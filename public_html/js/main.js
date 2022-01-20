@@ -62,11 +62,15 @@ class FilterEntry extends MinJson {
 	/**
 	 * @param id   String, desired element ID, if any
 	 * @param name String, desired element name; defaults to the filter entry's name
+	 * @param max_size Integer, maximum value for the select element's size attribute
 	 * @return HTML <select> element for the provided filter entry, or false if not valid
 	 */
-	getHtmlElement(id, name) {
+	getHtmlElement(id, name, max_size = 5) {
 		if (this.values.length < 1) {
 			return false;
+		}
+		if (!Number.isSafeInteger(max_size)) {
+			max_size = 5;
 		}
 		let div = document.createElement('DIV');
 		div.classList.add('fleft');
@@ -82,10 +86,9 @@ class FilterEntry extends MinJson {
 		if (id) {
 			sel.id = id;
 		}
-		const MAX_SELECT_SIZE = 5;
 		sel.name = (name ? name : this.name);
 		sel.setAttribute('multiple', true);
-		sel.setAttribute('size', Math.min(this.values.length, MAX_SELECT_SIZE));
+		sel.setAttribute('size', Math.min(this.values.length, max_size));
 		for (let i = 0; i < this.values.length; ++i) {
 			let v = this.values[i];
 			let opt = document.createElement('OPTION');
