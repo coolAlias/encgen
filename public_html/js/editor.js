@@ -193,42 +193,38 @@ function getEntries(filters) {
 		});
 	}
 	let entries = [];
-	try {
-		for (let i = 0; i < names.length; ++i) {
-			if (names[i].classList.contains('no_validate')) {
-				continue; // do not process templates until added
-			}
-			try {
-				let weight = parseInt(weights[i].value);
-				if (weight !== weight) {
-					weight = undefined;
-				}
-				let weight_id = parseInt(weight_ids[i].value);
-				if (weight_id !== weight_id) {
-					weight_id = undefined;
-				}
-				let ref_src = sources[i].value;
-				let ref_page = pages[i].value;
-				let entry_filters = new Map();
-				entries_filters.forEach(function(values, key) {
-					let selected = [];
-					Array.from(values[i].selectedOptions).forEach(v => {
-						let parsed = parseInt(v.value);
-						let val = (parsed === parsed ? parsed : v.value);
-						selected.push(val);
-					});
-					if (selected.length > 0) {
-						entry_filters.set(key, selected);
-					}
-				});
-				let obj = new Entry(names[i].value, weight, weight_id, ref_src, ref_page, entry_filters);
-				entries.push(obj);
-			} catch (err) {
-				console.log(err);
-			}
+	for (let i = 0; i < names.length; ++i) {
+		if (names[i].classList.contains('no_validate')) {
+			continue; // do not process templates until added
 		}
-	} catch (err) {
-		console.log(err);
+		try {
+			let weight = parseInt(weights[i].value);
+			if (weight !== weight) {
+				weight = undefined;
+			}
+			let weight_id = parseInt(weight_ids[i].value);
+			if (weight_id !== weight_id) {
+				weight_id = undefined;
+			}
+			let ref_src = sources[i].value;
+			let ref_page = pages[i].value;
+			let entry_filters = new Map();
+			entries_filters.forEach(function(values, key) {
+				let selected = [];
+				Array.from(values[i].selectedOptions).forEach(v => {
+					let parsed = parseInt(v.value);
+					let val = (parsed === parsed ? parsed : v.value);
+					selected.push(val);
+				});
+				if (selected.length > 0) {
+					entry_filters.set(key, selected);
+				}
+			});
+			let obj = new Entry(names[i].value, weight, weight_id, ref_src, ref_page, entry_filters);
+			entries.push(obj);
+		} catch (err) {
+			console.log(err);
+		}
 	}
 	return entries;
 }
