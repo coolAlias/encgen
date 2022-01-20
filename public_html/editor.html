@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>Random Encounter Table Generator</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="css/style.css" rel="stylesheet" type="text/css">
+		<meta name="robots" content="index, follow">
+	</head>
+	<body>
+		<div class="fright">
+			<ul><strong>Site Map</strong>:
+				<li><a href="index.html">Home Page</a></li>
+				<li><a href="editor.html">Data Editor</a></li>
+				<li><a href="generator.html">Table Generator</a></li>
+			</ul>
+		</div>
+		<h1>Data Editor</h1>
+		<label id="copy_data_box" for="data_box"><span class="icon">&nbsp;</span> Click to Copy</label> the text below to the clipboard.
+		<br>
+		<textarea id="data_box" class="data_box"></textarea>
+		<br>
+		<button id="btn_validate" title="Checks inputs for errors">Validate Form</button>
+		<button id="export_data" onclick="exportData()" title="Exports inputs into textbox above; copy and paste in a text editor to save">Export Data</button>
+		<button id="import_data" onclick="importData()" title="Imports data from the textbox above into the form inputs below">Import Data</button>
+		<hr>
+		<div class="tab_group">
+			<div id="tab-help_tab" class="tab tab_selected">
+				<a href="#" onclick="return selectTab('help_tab');"><strong>Help</strong></a>
+			</div>
+			<div id="tab-categories_tab" class="tab">
+				<a href="#" onclick="return selectTab('categories_tab');"><strong>Categories</strong></a>
+			</div>
+			<div id="tab-filters_tab" class="tab">
+				<a href="#" onclick="return selectTab('filters_tab');"><strong>Filters</strong></a>
+			</div>
+			<div id="tab-entries_tab" class="tab">
+				<a href="#" onclick="return selectTab('entries_tab');"><strong>Encounters</strong></a>
+			</div>
+		</div>
+		<form id="data_form" method="get" action="#" accept-charset="utf-8">
+			<div id="help_tab" class="container">
+				<p>IMPORTANT: Data is not saved when navigating to a different page (changing tabs is okay) - be sure to Export and Copy first!!!</p>
+				<h4>Starting from scratch:</h4>
+				<ol>
+					<li>Click the <strong>Categories</strong> tab to create encounter weight groupings (optional but recommended).</li>
+					<li>Click the <strong>Filters</strong> tab to set up the filters that will be used to curate the encounter table results.</li>
+					<li>Ensure you are satisfied with steps 1 and 2 - modifying these after the next step is not recommended.</li>
+					<li>Click the <strong>Encounters</strong> tab to create the entries used to populate the encounter tables.</li>
+					<li>Go to <strong>Finishing Up</strong> (see below).</li>
+				</ol>
+				<h4>Editing existing data:</h4>
+				<ol>
+					<li>Paste your JSON data into the TEXTAREA above.<br>Note that individual tabs may be imported by omitting the others from your data set, e.g. if only the "entries" JSON array is provided, only the Encounters tab will update.</li>
+					<li>Click the <strong>Import Data</strong> button to populate the various inputs.</li>
+					<li><strong>WARNING</strong>: Any changes to Categories and/or Filters do NOT automatically update Encounter entries at this time - you will need to do so manually.</li>
+					<li>Make any desired changes.</li>
+					<li>Go to <strong>Finishing Up</strong> (see below).</li>
+				</ol>
+				<h4>Finishing up:</h4>
+				<ol>
+					<li>Click the <strong>Export Data</strong> button to generate JSON data in the TEXTAREA above.</li>
+					<li>Copy the TEXTAREA text.</li>
+					<li>Paste into your favorite text editor and save a local copy.</li>
+					<li>Go to <a href="generator.html">Table Generator</a> and follow the instructions there.</li>
+				</ol>
+			</div>
+			<div id="categories_tab" class="container hide">
+				<p>If weight categories are not defined, all encounter entries will be grouped in a single weight category with the entry's individual weight determining their relative frequency.</p>
+				<p>Otherwise, each weight category determines its relative frequency and any encounters within that category will be evenly distributed within its frequency range.</p>
+				<table>
+					<thead>
+					<tr>
+						<th></th>
+						<th>Category Name</th>
+						<th>Weight</th>
+					</tr>
+					</thead><tbody id="categories">
+						<tr id="categories_new">
+							<td><a href="javascript:;" onclick="addEntry('categories_new', 'categories');" title="Add this entry">[&plus;]</a></td>
+							<td><input class="no_validate" type="text" name="categories_name[]" value="" required="required" /></td>
+							<td><input class="no_validate" type="number" name="categories_weight[]" value="1" data-default="1" min="1" required="required" /></td>
+						</tr>
+					<tbody><tfoot>
+					</tfoot>
+				</table>
+				<ul>
+					<li><strong>Category Name</strong>: Unique name identifying this weight category</li>
+					<li><strong>Weight</strong>: If n is the sum of all category weights, (weight / n) is the portion of encounters expected for each category</li>
+				</ul>
+			</div>
+			<div id="filters_tab" class="container hide">
+				<p>Filters defined here may be used later to customize the generated encounter table output.</p>
+				<table>
+					<thead>
+					<tr>
+						<th></th>
+						<th>Filter Name</th>
+						<th>Valid Values</th>
+					</tr>
+					</thead><tbody id="filters">
+						<tr id="filters_new">
+							<td><a href="javascript:;" onclick="addEntry('filters_new', 'filters');" title="Add this entry">[&plus;]</a></td>
+							<td><input class="no_validate" type="text" name="filters_name[]" value="" required="required" /></td>
+							<td><textarea class="no_validate" name="filters_values[]" required="required"></textarea></td>
+						</tr>
+					<tbody><tfoot>
+					</tfoot>
+				</table>
+				<ul>
+					<li><strong>Filter Name</strong>: Unique name identifying this filter</li>
+					<li><strong>Valid Values</strong>: List of valid filter values, in order, separated by new lines</li>
+				</ul>
+			</div>
+			<div id="entries_tab" class="container hide">
+				<p>Warning: only create and edit encounter entries once the Categories and Filters are set - any changes to these after this point will require manually verifying encounter entries.</p>
+				<table>
+					<thead>
+					<tr>
+						<th></th>
+						<th>Encounter Name</th>
+						<th>Encounter Weight</th>
+						<th>Reference Source</th>
+						<th>Reference Page</th>
+						<th>Filters</th>
+					</tr>
+					</thead><tbody id="entries">
+						<tr id="entries_new">
+							<td><a href="javascript:;" onclick="addEntry('entries_new', 'entries');" title="Add this entry">[&plus;]</a></td>
+							<td><input class="no_validate" type="text" name="entries_name[]" value="" required="required" /></td>
+							<td>
+								<input class="no_validate" type="number" name="entries_weight[]" value="1" data-default="1" min="1" required="required" />
+								<br>
+								<label>Category</label>
+								<br>
+								<select id="select_entry_category" class="no_validate" name="entries_category[]" data-default="0">
+									<option value="">None</option>
+								</select>
+							</td>
+							<td><input class="no_validate" type="text" name="entries_ref_src[]" value="" /></td>
+							<td><input class="no_validate" type="text" name="entries_ref_page[]" value="" /></td>
+							<td id="entries_filters_container">None available - click <strong>Refresh Data</strong> below when ready</td>
+						</tr>
+					<tbody><tfoot>
+					</tfoot>
+				</table>
+				<hr>
+				<button id="btn_refresh_data" onclick="refreshDataElements()" title="Builds or rebuilds the Category and Filter elements">Refresh Data</button><span>&nbsp;Use after populating Categories/Filters and <strong>before</strong> creating encounter entries.</span>
+				<ul>
+					<li><strong>Encounter Name</strong>: Unique name identifying this encounter entry</li>
+					<li><strong>Encounter Weight</strong>: Individual encounter weight; generally recommended to leave as 1 for an even distribution if using Weight Categories</li>
+					<li><strong>Encounter Weight Category</strong>: Optional encounter category used to determine relative overall frequency and group entries within it</li>
+					<li><strong>Reference Source</strong>: Optional reference source, e.g. 'Book of Monsters' or 'www.example.com'<br>A filter named <strong>Reference</strong> will be automatically created from available values when imported into the Generator if not explicitly set.</li>
+					<li><strong>Reference Page</strong>: Optional source page reference, e.g. 140 or '/goblin.html'</li>
+					<li><strong>Filters</strong>: Select all filter values that apply to this entry</li>
+				</ul>
+			</div>
+		</form>
+	</body><footer>
+	</footer>
+</html>
+<script src="js/main.js"></script>
+<script src="js/editor.js"></script>
