@@ -85,7 +85,7 @@ if ($header === null) {
 // Build mappings based on header
 foreach ($header as $i => $key) {
 	foreach ($filters as $filter => $values) {
-		if (!empty($values[$key])) {
+		if (array_key_exists($key, $values)) {
 			$csv_map['filters'][$filter][$key] = $i;
 			break(1);
 		}
