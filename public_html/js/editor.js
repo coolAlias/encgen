@@ -80,6 +80,7 @@ function buildCategoryOptions(target_id) {
 	}
 	target.replaceChildren();
 	let default_category = document.createElement('OPTION');
+	default_category.value = -1;
 	default_category.innerHTML = 'None';
 	target.appendChild(default_category);
 	let categories = getCategories();
@@ -199,11 +200,11 @@ function getEntries(filters) {
 			}
 			try {
 				let weight = parseInt(weights[i].value);
-				if (weight === NaN) {
+				if (weight !== weight) {
 					weight = undefined;
 				}
 				let weight_id = parseInt(weight_ids[i].value);
-				if (weight_id === NaN) {
+				if (weight_id !== weight_id) {
 					weight_id = undefined;
 				}
 				let ref_src = sources[i].value;
@@ -213,7 +214,7 @@ function getEntries(filters) {
 					let selected = [];
 					Array.from(values[i].selectedOptions).forEach(v => {
 						let parsed = parseInt(v.value);
-						let val = (parsed === NaN ? v.value : parsed);
+						let val = (parsed === parsed ? parsed : v.value);
 						selected.push(val);
 					});
 					if (selected.length > 0) {
