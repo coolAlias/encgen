@@ -1,3 +1,4 @@
+debug_mode = true;
 /**
  * Class that excludes properties with the default value from JSON output.
  */
@@ -102,6 +103,104 @@ class FilterEntry extends MinJson {
 }
 
 /**
+ * Creates a filter with the specified rules
+ * @property name   String, key of the FilterEntry object
+ * @property and    Boolean, true to require all values to match
+ * @property not    Boolean, true to require entries to NOT match the selected values
+ * @property values Array<Integer> of currently selected values, each corresponding to a FilterEntry#values array index
+ */
+class Filter {
+	/**
+	 * @param filter FilterEntry object used to validate the values
+	 * @param values Array<String> of currently selected FilterEntry values
+	 */
+	constructor(filter, and = false, not = false, values = []) {
+		if (!(filter instanceof FilterEntry)) {
+			throw new Error('Invalid argument type; expected FilterEntry');
+		} else if (values.length < 1) {
+			throw new Error('Filter requires at least one selected value');
+		}
+		this.filter = filter;
+		this.name = filter.name;
+		this.and = and;
+		this.not = not;
+		this.values = [];
+		values.forEach(s => {
+			let i = filter.values.indexOf(s);
+			if (i > -1) {
+				this.values.push(i);
+			}
+		});
+	}
+	/**
+	 * Checks the entry against the filter rules
+	 * @param entry Entry object
+	 * @return Boolean, true if the entry has at least one selected value for this filter and all rules were passed
+	 */
+	apply(entry) {
+		if (!(entry instanceof Entry)) {
+			return false;
+		}
+		let matches = entry.filters.get(this.name);
+		if (!matches || matches.length < 1) {
+			log(entry.name + ' failed ' + this.name + ' filter: not applicable');
+			return false;
+		}
+		if (this.not) {
+			// NOT AND: Must not contain any of the selected entries
+			// NOT OR: Must contain at least one entry that was not selected
+			for (let i = 0; i < matches.length; ++i) {
+				let index = this.values.indexOf(matches[i]);
+				if (this.and) {
+					if (index > -1) {
+						log(entry.name + ' failed ' + this.name + ' filter(NOT AND): ' + matches + ' contained at least one of the selected values ' + this.values);
+						return false;
+					}
+				} else if (index < 0) {
+					log(entry.name + ' passed ' + this.name + ' filter(NOT OR): ' + matches + ' contained at least one entry NOT in the selected values ' + this.values);
+					return true;
+				}
+			};
+			if (this.and) {
+				log(entry.name + ' passed ' + this.name + ' filter(NOT AND): ' + matches + ' did not contain any of the selected values ' + this.values);
+			} else {
+				log(entry.name + ' failed ' + this.name + ' filter(NOT OR): ' + matches + ' did not contain any entries NOT in the selected values ' + this.values);
+			}
+			return this.and;
+		} else {
+			// AND: Must contain all of the selected entries
+			// OR: Must contain at least one selected entry
+			for (let i = 0; i < this.values.length; ++i) {
+				let index = matches.indexOf(this.values[i]);
+				if (this.and) {
+					if (index < 0) {
+						log(entry.name + ' failed ' + this.name + ' filter(AND): ' + matches + ' did not contain all of the selected values ' + this.values);
+						return false;
+					}
+				} else if (index > -1) {
+					log(entry.name + ' passed ' + this.name + ' filter(OR): ' + matches + ' contained at least one entry in the selected values ' + this.values);
+					return true;
+				}
+			};
+			if (this.and) {
+				log(entry.name + ' passed ' + this.name + ' filter(AND): ' + matches + ' contained all of the selected values ' + this.values);
+			} else {
+				log(entry.name + ' failed ' + this.name + ' filter(OR): ' + matches + ' did not contain any of the selected values ' + this.values);
+			}
+			return this.and;
+		}
+	}
+	toText() {
+		let txt_values = [];
+		this.values.forEach(v => txt_values.push(this.filter.values[v]));
+		if (this.and) {
+			return this.name + ' containing ' + (this.not ? 'NO' : 'ALL') + ' values in [' + txt_values + ']';
+		}
+		return this.name + ' containing at least one value ' + (this.not ? 'NOT ' : '') + 'in [' + txt_values + ']';
+	}
+}
+
+/**
  *
  * @property name      String, unique name for the entry, e.g. "Goblin"
  * @property weight    Integer, individual encounter weight
@@ -142,6 +241,21 @@ class Entry extends MinJson {
 		case 'weight_id': return this.weight_id < 0;
 		}
 		return false;
+	}
+}
+
+function getRandomIntInclusive(min, max) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+/**
+ * Logs a message to the console if the global var 'debug_mode' is true
+ */
+function log(message) {
+	if (typeof debug_mode !== 'undefined' && debug_mode) {
+		console.log(message);
 	}
 }
 

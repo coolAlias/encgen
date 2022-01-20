@@ -18,6 +18,21 @@ textarea.data_box {
 	width: 75%;
 	height: 25%;
 }
+table {
+	border: 1px solid darkgrey;
+	border-spacing: 0;
+}
+table th {
+	border: 1px solid darkgrey;
+	padding: 8px;
+}
+table td {
+	border: 1px solid darkgrey;
+	padding: 8px;
+}
+.center {
+	text-align: center;
+}
 .clear {
 	clear:both;
 }
