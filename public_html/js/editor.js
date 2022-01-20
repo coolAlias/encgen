@@ -66,7 +66,7 @@ function removeEntry() {
  */
 function refreshDataElements() {
 	buildCategoryOptions('select_entry_category');
-	buildFilterElements('entries_filters_container');
+	buildFilterEntryElements('entries_filters_container');
 }
 
 /**
@@ -92,12 +92,12 @@ function buildCategoryOptions(target_id) {
 }
 
 /**
- * Builds the Filter <select> element templates used for new Encounter Entries
+ * Builds the FilterEntry <select> element templates used for new Encounter Entries
  * and places them in the target container, replacing any existing contents.
  * @param target_id String, target container id
  */
-function buildFilterElements(target_id) {
-	let filters = getFilters();
+function buildFilterEntryElements(target_id) {
+	let filters = getFilterEntries();
 	let target = document.getElementById(target_id);
 	if (!target || !filters || filters.size < 1) {
 		return;
@@ -105,13 +105,13 @@ function buildFilterElements(target_id) {
 	target.replaceChildren();
 	Array.from(filters.values()).forEach(v => {
 		try {
-			let obj = new Filter(v.name, v.values);
+			let obj = new FilterEntry(v.name, v.values);
 			let el = obj.getHtmlElement(null, 'filter_' + obj.name + '[]');
 			if (el) {
 				target.appendChild(el);
 			}
 		} catch (err) {
-			console.log("Ignored invalid filter: " + err);
+			console.log("Ignored invalid filter entry: " + err);
 		}
 	});
 	return false;
@@ -143,9 +143,9 @@ function getCategories() {
 }
 
 /**
- * @return Map<String, Filter> based on user inputs, keyed by the filter's name
+ * @return Map<String, FilterEntry> based on user inputs, keyed by the filter entry's name
  */
-function getFilters() {
+function getFilterEntries() {
 	let names = document.getElementsByName('filters_name[]');
 	let values = document.getElementsByName('filters_values[]');
 	if (names.length !== values.length) {
@@ -158,7 +158,7 @@ function getFilters() {
 		}
 		try {
 			let entries = values[i].value.split("\n");
-			let obj = new Filter(names[i].value, entries);
+			let obj = new FilterEntry(names[i].value, entries);
 			filters.set(obj.name, obj);
 		} catch (err) {
 			console.log(err);
@@ -168,7 +168,7 @@ function getFilters() {
 }
 
 /**
- * @param filters Map<String, Filter> of existing filters
+ * @param filters Map<String, FilterEntry> of existing filters
  * @return Array<Entry> based on user inputs
  */
 function getEntries(filters) {
@@ -239,7 +239,7 @@ function exportData() {
 		return;
 	}
 	let categories = getCategories();
-	let filters = getFilters();
+	let filters = getFilterEntries();
 	let entries = getEntries(filters);
 	let data = new Object();
 	if (categories.length > 0) {
@@ -298,15 +298,15 @@ function importData() {
 		table.appendChild(template);
 		data.filters.forEach(v => {
 			try {
-				let obj = new Filter(v.name, v.values);
+				let obj = new FilterEntry(v.name, v.values);
 				template.children[1].children[0].value = obj.name;
 				template.children[2].children[0].value = obj.values.join("\n");
 				addEntryToElement(template, table);
 			} catch (err) {
-				console.log("Ignored invalid filter: " + err);
+				console.log("Ignored invalid filter entry: " + err);
 			}
 		});
-		buildFilterElements('entries_filters_container');
+		buildFilterEntryElements('entries_filters_container');
 	}
 	// Import encounter entries
 	if (data.entries) {

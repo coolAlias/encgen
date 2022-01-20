@@ -42,15 +42,15 @@ class Category extends MinJson {
 }
 
 /**
- * A filter defines a set of valid values, any number of which may be applied when generating an encounter table.
+ * A filter entry defines a set of valid values, any number of which may be applied when generating an encounter table.
  * @property name   String, unique name for the filter grouping, e.g. "Climate"
- * @property values Array<String> containing all valid values for this filter
+ * @property values Array<String> containing all valid values for this filter entry
  */
-class Filter extends MinJson {
+class FilterEntry extends MinJson {
 	constructor(name, values = []) {
 		super();
 		if (typeof name !== 'string' || name.length < 1) {
-			throw new Error('Filter.name must be a non-empty String');
+			throw new Error('FilterEntry.name must be a non-empty String');
 		}
 		this.name = name;
 		if (Array.isArray(values)) {
@@ -61,8 +61,8 @@ class Filter extends MinJson {
 	}
 	/**
 	 * @param id   String, desired element ID, if any
-	 * @param name String, desired element name; defaults to the filter name
-	 * @return HTML <select> element for the provided filter, or false if not valid
+	 * @param name String, desired element name; defaults to the filter entry's name
+	 * @return HTML <select> element for the provided filter entry, or false if not valid
 	 */
 	getHtmlElement(id, name) {
 		if (this.values.length < 1) {
@@ -105,7 +105,7 @@ class Filter extends MinJson {
  * @property weight_id Integer, encounter weight category id
  * @property ref_src   String, optional name of reference source, e.g. "HoB 1" or "www.monsters.com"
  * @property ref_page  String, optional reference page number, e.g. "140" or "/goblin"
- * @property filters   Map<String, Array<Integer>> of applicable Filter value array indices keyed by Filter name
+ * @property filters   Map<String, Array<Integer>> of applicable FilterEntry value array indices keyed by FilterEntry name
  */
 class Entry extends MinJson {
 	constructor(name, weight = 1, weight_id = -1, ref_src = '', ref_page = '', filters = null) {
