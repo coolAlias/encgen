@@ -285,7 +285,7 @@ function importData() {
 				template.children[2].children[0].value = obj.weight;
 				addEntryToElement(template, table);
 			} catch (err) {
-				console.log("Ignored invalid filter: " + err);
+				console.log("Ignored invalid encounter weight category: " + err);
 			}
 		});
 		buildCategoryOptions('select_entry_category');
