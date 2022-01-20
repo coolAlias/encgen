@@ -350,9 +350,15 @@ function importData() {
 			}
 		});
 	}
-	let _form = document.getElementById('data_form');
-	if (!validateForm(_form)) {
-		alert('One or more errors were detected - see form inputs');
+	if (typeof err === 'undefined') {
+		let _form = document.getElementById('data_form');
+		if (validateForm(_form)) {
+			alert('Data imported successfully');
+		} else {
+			alert('Data imported successfully but one or more input errors were detected');
+		}
+	} else {
+		alert('One or more errors were detected - see console for details');
 	}
 }
 
