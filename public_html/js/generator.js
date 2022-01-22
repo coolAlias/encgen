@@ -487,7 +487,7 @@ function generateEncounterTable() {
 				break;
 			}
 		}
-	} else {
+	} else if (entries.length > 0) {
 		total_weight = entries.reduce((sum, obj) => { return sum + obj.weight; }, 0);
 		let cat = new Category("Default", total_weight);
 		let group = new EncTblGroup(cat, entries);
