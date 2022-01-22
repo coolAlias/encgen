@@ -1,6 +1,7 @@
 const glob_categories = [];
 const glob_filters = new Map();
 const glob_entries = [];
+glob_enc_tbl = null;
 
 /**
  * @property name     String, see Category.name
@@ -161,6 +162,63 @@ class EncTblEntry {
 	}
 }
 
+/**
+ * Stores a generated table for convenient export
+ * @property die_size     Integer, die size used to generate the table
+ * @property filters      Array<Filter> of applied filters
+ * @property include_meta Boolean, true to include metadata such as the die size, filter options, etc. when exported to JSON or other format
+ */
+class EncTblContainer {
+	constructor(die_size, filters = []) {
+		this.die_size = die_size;
+		this.entries = [];
+		this.filters = filters;
+		this.include_meta = true;
+	}
+	/**
+	 * @param entries Array<EncTblEntry> of entries in this table
+	 */
+	setEntries(entries = []) {
+		// Ensure all entry min/max range values are set relative to the others
+		let lastEntry = null;
+		entries.forEach(entry => {
+			entry.getRangeText(lastEntry);
+			lastEntry = entry;
+		});
+		this.entries = entries;
+	}
+	toCsv() {
+		this.csv = true;
+		return this.#getLines(",").join("\n");
+	}
+	toText() {
+		this.csv = false;
+		return this.#getLines("\t").join("\n");
+	}
+	#escTxt(txt) {
+		if (this.csv) {
+			txt = '' + txt; // force String type
+			return '"' + txt.replace(/"/g, '""') + '"';
+		}
+		return txt;
+	}
+	#getLines(separator = "\t") {
+		let lines = [];
+		if (this.include_meta) {
+			lines.push(this.#escTxt("RANDOM ENCOUNTER TABLE"));
+			if (this.filters.length > 0) {
+				lines.push(this.#escTxt("Filters:"));
+				this.filters.forEach(obj => lines.push(this.#escTxt(obj.toText())));
+			}
+		}
+		lines.push(this.#escTxt("d" + this.die_size) + separator + this.#escTxt("Encounter") + separator + this.#escTxt("Source") + separator + this.#escTxt("Page"));
+		this.entries.forEach(obj => {
+			lines.push(this.#escTxt(obj.getRangeText(null)) + separator + this.#escTxt(obj.name) + separator + this.#escTxt(obj.ref_src) + separator + this.#escTxt(obj.ref_page));
+		});
+		return lines;
+	}
+}
+
 function importData() {
 	let data_box = document.getElementById('import_data_box');
 	if (!data_box || data_box.value.length < 1) {
@@ -272,6 +330,7 @@ function generateEncounterTable() {
 	let num_entries = parseInt(document.getElementById('num_entries').value);
 	let allow_duplicates = document.getElementById('allow_duplicates').checked;
 	let include_ungrouped = document.getElementById('include_ungrouped').checked;
+	glob_enc_tbl = new EncTblContainer(die_size);
 	// Apply filters to a copy of the encounter list
 	let entries = glob_entries;
 	log('Starting list length: ' + entries.length);
@@ -289,6 +348,7 @@ function generateEncounterTable() {
 			let and = document.getElementById('filter_and_' + key).checked;
 			let not = document.getElementById('filter_not_' + key).checked;
 			let filter = new Filter(obj, and, not, values);
+			glob_enc_tbl.filters.push(filter);
 			entries = entries.filter(v => filter.apply(v));
 			let p = document.createElement('SPAN');
 			p.innerHTML = filter.toText();
@@ -383,8 +443,11 @@ function generateEncounterTable() {
 	}
 	// Display results
 	if (tbl_entries.length > 0) {
+		glob_enc_tbl.setEntries(tbl_entries);
 		document.getElementById('tbl_die_size').innerHTML = 'd' + die_size;
 		displayEncounterTable(tbl_entries);
+	} else {
+		glob_enc_tbl = null;
 	}
 }
 
@@ -421,6 +484,29 @@ function displayEncounterTable(entries) {
 }
 
 function exportData() {
+	if (!glob_enc_tbl || glob_enc_tbl.entries.length < 1) {
+		return;
+	}
+	let check_meta = document.getElementById('include_meta');
+	glob_enc_tbl.include_meta = (check_meta && check_meta.checked);
+	let sel_format = document.getElementById('export_format');
+	let format = 'csv';
+	if (sel_format && sel_format.selectedIndex > -1) {
+		format = sel_format.options[sel_format.selectedIndex].value;
+	}
+	let data_box = document.getElementById('export_data_box');
+	let output = null;
+	switch (format) {
+	case 'csv':
+		output = glob_enc_tbl.toCsv();
+		break;
+	default: // fall back to 'txt' for invalid options
+		output = glob_enc_tbl.toText();
+		break;
+	}
+	if (data_box && output) {
+		data_box.value = output;
+	}
 }
 
 window.addEventListener('load', function(event) {
