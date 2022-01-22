@@ -201,6 +201,50 @@ class Filter {
 }
 
 /**
+ * A filter that includes or excludes entries based on a [min, max] range instead of specific values.
+ * @property name   String, key of the Entry object property to check
+ * @property min    Integer, the minimum acceptable value
+ * @property max    Integer, the maximum acceptable value
+ * @property not    Boolean, true to require entries to NOT match the defined range
+ */
+class FilterRange {
+	constructor(name, min, max, not = false) {
+		if (!Number.isSafeInteger(min)) {
+			throw new Error('FilterRange.min must be an integer value');
+		}
+		if (!Number.isSafeInteger(max)) {
+			throw new Error('FilterRange.max must be an integer value');
+		}
+		this.name = name;
+		this.min = Math.min(min, max);
+		this.max = Math.max(min, max);
+		this.not = not;
+	}
+	/**
+	 * Checks the entry against the filter rules
+	 * @param entry Entry object to validate
+	 * @return Boolean, true if the entry has the requested property and its value meets the range requirements
+	 */
+	apply(entry) {
+		if (!(entry instanceof Entry)) {
+			return false;
+		} else if (!entry.hasOwnProperty(this.name)) {
+			return false;
+		}
+		let value = entry[this.name];
+		let in_range = (value >= this.min && value <= this.max);
+		if (this.not) {
+			in_range = !in_range;
+		}
+		log(entry.name + (in_range ? ' passed' : ' failed') + ' range filter(' + this.name + (this.not ? 'NOT ' : '') + ' between ' + this.min + ' and ' + this.max);
+		return in_range;
+	}
+	toText() {
+		return 'Range filter for Entry.' + this.name + (this.not ? ' NOT' : '') + ' between ' + this.min + ' and ' + this.max;
+	}
+}
+
+/**
  *
  * @property name      String, unique name for the entry, e.g. "Goblin"
  * @property weight    Integer, individual encounter weight

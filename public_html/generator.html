@@ -39,6 +39,7 @@
 			<h4>FILTERS</h4>
 			<p>Default behavior includes encounter entries that match at least one of each selected filter.</p>
 			<p>The behavior of <strong>Exclude Selected</strong> is as follows:<br>1. Match ONE: Exclude entries that do not have at least one non-selected option (but may also match one or more of the selected options)<br>2. Match ALL: Exlude entries with any of the selected values (the most common use case)</p>
+			<p>For <strong>Range Filters</strong>, the <strong>Exclude</strong> option excludes entries that fall within the specified range.</p>
 		</div>
 		<div id="gen_tab" class="container hide">
 			<div class="fleft gen_pane-left">
@@ -71,6 +72,19 @@
 					<h4>SELECT FILTERS</h4>
 					<hr>
 					<div id="filters">
+					</div>
+					<div id="range_filters_container" class="hide">
+						<table>
+							<thead>
+								<tr>
+									<th>Apply To</th>
+									<th>Min</th>
+									<th>Max</th>
+									<th>Exclude</th>
+								</tr>
+							<thead><tbody id="range_filters">
+							</tbody>
+						</table>
 					</div>
 					<div class="clear"></div>
 				</form>

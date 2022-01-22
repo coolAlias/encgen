@@ -1,5 +1,6 @@
 const glob_categories = [];
 const glob_filters = new Map();
+const glob_range_filters = [];
 const glob_entries = [];
 glob_enc_tbl = null;
 
@@ -164,15 +165,17 @@ class EncTblEntry {
 
 /**
  * Stores a generated table for convenient export
- * @property die_size     Integer, die size used to generate the table
- * @property filters      Array<Filter> of applied filters
+ * @property die_size      Integer, die size used to generate the table
+ * @property filters       Array<Filter> of applied filters
+ * @property range_filters Array<FilterRange> of applied range filters
  * @property include_meta Boolean, true to include metadata such as the die size, filter options, etc. when exported to JSON or other format
  */
 class EncTblContainer {
-	constructor(die_size, filters = []) {
+	constructor(die_size, filters = [], range_filters = []) {
 		this.die_size = die_size;
 		this.entries = [];
 		this.filters = filters;
+		this.range_filters = range_filters;
 		this.include_meta = true;
 	}
 	/**
@@ -209,6 +212,10 @@ class EncTblContainer {
 			if (this.filters.length > 0) {
 				lines.push(this.#escTxt("Filters:"));
 				this.filters.forEach(obj => lines.push(this.#escTxt(obj.toText())));
+			}
+			if (this.range_filters.length > 0) {
+				lines.push(this.#escTxt("Range Filters:"));
+				this.range_filters.forEach(obj => lines.push(this.#escTxt(obj.toText())));
 			}
 		}
 		lines.push(this.#escTxt("d" + this.die_size) + separator + this.#escTxt("Encounter") + separator + this.#escTxt("Source") + separator + this.#escTxt("Page"));
@@ -270,6 +277,23 @@ function importData() {
 			}
 		});
 	}
+	// Import range filters
+	let range_filters_container = document.getElementById('range_filters_container');
+	let range_filters = document.getElementById('range_filters');
+	if (data.range_filters) {
+		glob_range_filters.splice(0, glob_range_filters.length);
+		range_filters_container.classList.remove('hide');
+		range_filters.replaceChildren();
+		data.range_filters.forEach(col => {
+			let el = getRangeFilterTableRow(col);
+			if (el) {
+				glob_range_filters.push(col);
+				range_filters.appendChild(el);
+			}
+		});
+	} else {
+		range_filters_container.classList.add('hide');
+	}
 	// Import encounter entries
 	if (data.entries) {
 		// TODO this is a hacky way to clear the array since we declared it as a constant
@@ -279,6 +303,14 @@ function importData() {
 		data.entries.forEach(v => {
 			try {
 				let obj = new Entry(v.name, v.weight, v.weight_id, v.ref_src, v.ref_page, v.filters);
+				if (data.range_filters) {
+					data.range_filters.forEach(col => {
+						let value = parseInt(v[col]);
+						if (value === value) {
+							obj[col] = value;
+						}
+					});
+				}
 				glob_entries.push(obj);
 				if (add_src_filter && obj.ref_src !== '') {
 					sources.set(obj.ref_src, 1);
@@ -325,6 +357,42 @@ function getdLabeledCheckbox(name, label, title) {
 	return container;
 }
 
+function getRangeFilterTableRow(col) {
+	let tr = document.createElement('TR');
+	let td = document.createElement('TD');
+	td.innerHTML = col;
+	tr.appendChild(td);
+	['min','max'].forEach(v => {
+		td = document.createElement('TD');
+		createRangeFilterInput(td, col, v, false);
+		tr.appendChild(td);
+	});
+	td = document.createElement('TD');
+	let input = document.createElement('INPUT');
+	input.type = 'checkbox';
+	input.id = col + '_range_not';
+	input.name = input.id;
+	td.appendChild(input);
+	tr.appendChild(td);
+	return tr;
+}
+
+function createRangeFilterInput(container, col, suffix, add_label = false) {
+	let input = document.createElement('INPUT');
+	input.id = col + '_range_' + suffix;
+	input.name = input.id;
+	input.type = 'number';
+	if (add_label) {
+		let label = document.createElement('LABEL');
+		label.htmlFor = input.id;
+		let prefix = col.charAt(0).toLocaleUpperCase() + col.slice(1);
+		label.innerHTML = prefix + ' ' + suffix.charAt(0).toLocaleUpperCase() + suffix.slice(1);
+		container.appendChild(label);
+		container.appendChild(document.createElement('BR'));
+	}
+	container.appendChild(input);
+}
+
 function generateEncounterTable() {
 	let die_size = parseInt(document.getElementById('die_size').value);
 	let num_entries = parseInt(document.getElementById('num_entries').value);
@@ -349,6 +417,21 @@ function generateEncounterTable() {
 			let not = document.getElementById('filter_not_' + key).checked;
 			let filter = new Filter(obj, and, not, values);
 			glob_enc_tbl.filters.push(filter);
+			entries = entries.filter(v => filter.apply(v));
+			let p = document.createElement('SPAN');
+			p.innerHTML = filter.toText();
+			option_container.appendChild(p);
+			option_container.appendChild(document.createElement('BR'));
+		}
+	});
+	// Apply range filters
+	glob_range_filters.forEach(col => {
+		let min = parseInt(document.getElementById(col + '_range_min').value);
+		let max = parseInt(document.getElementById(col + '_range_max').value);
+		let not = document.getElementById(col + '_range_not').checked;
+		if (min === min && max === max) {
+			let filter = new FilterRange(col, min, max, not);
+			glob_enc_tbl.range_filters.push(filter);
 			entries = entries.filter(v => filter.apply(v));
 			let p = document.createElement('SPAN');
 			p.innerHTML = filter.toText();

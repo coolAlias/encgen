@@ -105,18 +105,24 @@
 							<td><textarea class="no_validate" name="filters_values[]" required="required"></textarea></td>
 						</tr>
 					<tbody><tfoot>
+						<tr>
+							<td></td>
+							<td>Range Filters</td>
+							<td><textarea id="filter_range_cols" class="no_validate" name="filter_range_cols"></textarea></td>
+						</tr>
 					</tfoot>
 				</table>
 				<ul>
 					<li><strong>Filter Name</strong>: Unique name identifying this filter</li>
 					<li><strong>Valid Values</strong>: List of valid filter values, in order, separated by new lines</li>
+					<li><strong>Range Filters</strong>: Enter column names that may have a range filter applied to them</li>
 				</ul>
 			</div>
 			<div id="entries_tab" class="container hide">
 				<p>Warning: only create and edit encounter entries once the Categories and Filters are set - any changes to these after this point will require manually verifying encounter entries.</p>
 				<table>
 					<thead>
-					<tr>
+					<tr id="entries_header">
 						<th></th>
 						<th>Encounter Name</th>
 						<th>Encounter Weight</th>

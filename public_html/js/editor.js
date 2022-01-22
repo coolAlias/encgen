@@ -67,6 +67,7 @@ function removeEntry() {
 function refreshDataElements() {
 	buildCategoryOptions('select_entry_category');
 	buildFilterEntryElements('entries_filters_container');
+	buildRangeFilterCols();
 }
 
 /**
@@ -116,6 +117,56 @@ function buildFilterEntryElements(target_id) {
 		}
 	});
 	return false;
+}
+
+function buildRangeFilterCols() {
+	let filter_range_cols = document.getElementById('filter_range_cols');
+	let range_cols = (filter_range_cols ? filter_range_cols.value.split("\n").filter(s => s.length > 0) : []);
+	// Remove any non-matching range cols
+	let old = document.getElementsByClassName('range_col');
+	let existing_cols = [];
+	if (old) {
+		for (let i = old.length - 1; i >= 0; --i) {
+			let found = false;
+			if (range_cols.length > 0) {
+				for (let j = 0; j < range_cols.length && !found; ++j) {
+					let col_name = 'col-' + range_cols[j];
+					if (old[i].classList.contains(col_name)) {
+						found = true;
+						existing_cols.push(col_name);
+					}
+				}
+			}
+			if (!found) {
+				old[i].remove();
+			}
+		}
+	}
+	// Add any newly defined range cols
+	if (range_cols.length > 0) {
+		let header = document.getElementById('entries_header');
+		let template = document.getElementById('entries_new');
+		range_cols.forEach(col => {
+			let col_name = 'col-' + col;
+			if (existing_cols.indexOf(col_name) > -1) {
+				return;
+			}
+			let th = document.createElement('TH');
+			th.classList.add(col_name);
+			th.classList.add('range_col');
+			th.innerHTML = col.charAt(0).toLocaleUpperCase() + col.slice(1);
+			header.insertBefore(th, header.lastElementChild);
+			let td = document.createElement('TD');
+			td.classList.add(col_name);
+			td.classList.add('range_col');
+			let input = document.createElement('INPUT');
+			input.classList.add('no_validate');
+			input.type = 'number';
+			input.name = 'range_' + col + '[]';
+			td.appendChild(input);
+			template.insertBefore(td, template.lastElementChild);
+		});
+	}
 }
 
 /**
@@ -178,6 +229,16 @@ function getEntries(filters) {
 	let weight_ids = document.getElementsByName('entries_category[]');
 	let sources = document.getElementsByName('entries_ref_src[]');
 	let pages = document.getElementsByName('entries_ref_page[]');
+	let filter_range_cols = document.getElementById('filter_range_cols');
+	let range_cols = (filter_range_cols ? filter_range_cols.value.split("\n").filter(s => s.length > 0) : []);
+	let range_filters = new Map();
+	range_cols.forEach(col => {
+		let ranges = document.getElementsByName('range_' + col + '[]');
+		if (!ranges || ranges.length !== names.length) {
+			throw new Error('Invalid input data for encounter entries - missing Range Filter column ' + col);
+		}
+		range_filters.set(col, ranges);
+	});
 	if (names.length !== weights.length || weights.length !== weight_ids.length || weight_ids.length !== sources.length || sources.length !== pages.length) {
 		throw new Error('Invalid input data for encounter entries');
 	}
@@ -221,6 +282,12 @@ function getEntries(filters) {
 				}
 			});
 			let obj = new Entry(names[i].value, weight, weight_id, ref_src, ref_page, entry_filters);
+			range_filters.forEach(function(values, key) {
+				let value = parseInt(values[i].value);
+				if (value === value) {
+					obj[key] = value;
+				}
+			});
 			entries.push(obj);
 		} catch (err) {
 			console.log(err);
@@ -244,6 +311,12 @@ function exportData() {
 	}
 	if (filters.size > 0) {
 		data.filters = Array.from(filters.values());
+	}
+	// Range filters
+	let filter_range_cols = document.getElementById('filter_range_cols');
+	let range_cols = (filter_range_cols ? filter_range_cols.value.split("\n").filter(s => s.length > 0) : []);
+	if (range_cols.length > 0) {
+		data.range_filters = range_cols;
 	}
 	if (entries.length > 0) {
 		data.entries = entries;
@@ -305,6 +378,12 @@ function importData() {
 		});
 		buildFilterEntryElements('entries_filters_container');
 	}
+	// Import range filters
+	if (data.range_filters) {
+		let filter_range_cols = document.getElementById('filter_range_cols');
+		filter_range_cols.value = data.range_filters.join("\n");
+		buildRangeFilterCols();
+	}
 	// Import encounter entries
 	if (data.entries) {
 		let table = document.getElementById('entries');
@@ -315,8 +394,9 @@ function importData() {
 		data.entries.forEach(v => {
 			try {
 				let obj = new Entry(v.name, v.weight, v.weight_id, v.ref_src, v.ref_page, v.filters);
-				template.children[1].children[0].value = obj.name;
-				template.children[2].children[0].value = obj.weight;
+				let j = 1;
+				template.children[j++].children[0].value = obj.name;
+				template.children[j++].children[0].value = obj.weight;
 				if (select_weight_category) {
 					for (let i = 0; i < select_weight_category.options.length; ++i) {
 						// Non-strict comparison
@@ -326,10 +406,16 @@ function importData() {
 						}
 					}
 				}
-				template.children[3].children[0].value = obj.ref_src;
-				template.children[4].children[0].value = obj.ref_page;
+				template.children[j++].children[0].value = obj.ref_src;
+				template.children[j++].children[0].value = obj.ref_page;
+				if (data.range_filters) {
+					data.range_filters.forEach(col => {
+						obj[col] = v[col];
+						template.children[j++].children[0].value = obj[col];
+					});
+				}
 				if (obj.filters.size > 0) {
-					let selects = template.children[5].getElementsByTagName('SELECT');
+					let selects = template.children[j++].getElementsByTagName('SELECT');
 					for (let i = 0; i < selects.length; ++i) {
 						let n = 'filter_'.length;
 						let filter_key = selects[i].name.substr(n, selects[i].name.length - (n + 2));
