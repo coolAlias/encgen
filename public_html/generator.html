@@ -36,83 +36,88 @@
 				<li><p>Open the <strong>Encounter Table</strong> tab and click the <strong>Generate</strong> button to generate a random table.</p></li>
 				<li><p><strong>Export</strong> the table in your favorite format to save for later.</p></li>
 			</ol>
+			<h4>FILTERS</h4>
+			<p>Default behavior includes encounter entries that match at least one of each selected filter.</p>
+			<p>The behavior of <strong>Exclude Selected</strong> is as follows:<br>1. Match ONE: Exclude entries that do not have at least one non-selected option (but may also match one or more of the selected options)<br>2. Match ALL: Exlude entries with any of the selected values (the most common use case)</p>
 		</div>
 		<div id="gen_tab" class="container hide">
-			<h4>SELECT OPTIONS</h4>
-			<hr>
-			<form id="data_form" method="get" action="#" accept-charset="utf-8">
-				<div id="options">
-					<div class="fleft container">
-						<label for="die_size">Die Size</label>
-						<br>
-						<input id="die_size" type="number" name="die_size" value="10000" min="4" max="10000" />
-					</div>
-					<div class="fleft container">
-						<label for="num_entries">Number of Entries</label>
-						<br>
-						<input id="num_entries" type="number" name="num_entries" value="20" min="1" max="1000" />
-					</div>
-					<div class="fleft container">
-						<label for="allow_duplicates">Allow Duplicates</label>
-						<br>
-						<input id="allow_duplicates" type="checkbox" name="allow_duplicates" title="Allow entries to be selected multiple times" />
-					</div>
-					<div class="fleft container">
-						<label for="include_ungrouped">Include Ungrouped</label>
-						<br>
-						<input id="include_ungrouped" type="checkbox" name="include_ungrouped" title="Include entries not assigned to a Category in a Default group" />
-					</div>
-				</div>
-				<div class="clear"></div>
-				<h4>SELECT FILTERS</h4>
+			<div class="fleft gen_pane-left">
+				<h4>SELECT OPTIONS</h4>
 				<hr>
-				<p>Default behavior includes encounter entries that match at least one of each selected filter.</p>
-				<p>The behavior of <strong>Exclude Selected</strong> is as follows:<br>1. Match ONE: Exclude entries that do not have at least one non-selected option (but may also match one or more of the selected options)<br>2. Match ALL: Exlude entries with any of the selected values (the most common use case)</p>
-				<div id="filters">
-				</div>
-				<div class="clear"></div>
-			</form>
-			<hr>
-			<button id="generate_table">Generate</button>
-			<button id="export_data">Export</button>
-			&nbsp;
-			<label for="export_format">Format</label>
-			<select id="export_format" name="export_format">
-				<option value="csv">CSV</option>
-				<option value="txt">Plain Text</option>
-			</select>
-			<label for="include_meta"><input id="include_meta" type="checkbox" name="include_meta" title="Include metadata such as the applied filters when exporting" />Include Table Metadata</label>
-			<br>
-			<br>
-			<label id="copy_data_box" for="export_data_box"><span class="icon">&nbsp;</span> Click to Copy</label> the text below to the clipboard.
-			<br>
-			<textarea id="export_data_box" class="data_box"></textarea>
-			<hr>
-			<div id="enc_tbl_container" class="container hide">
-				<h4>RANDOM ENCOUNTER TABLE</h4>
-				<p><strong>Applied filters:</strong></p>
-				<div id="enc_opt_container" class="container">
-				</div>
-				<br>
-				<table>
-					<thead>
-						<tr>
-							<th class="center" id="tbl_die_size"></th>
-							<th>Encounter</th>
-							<th>Source</th>
-							<th>Page</th>
-						</tr>
-					<thead><tbody id="enc_tbl_entries">
-					</tbody><tfoot class="hide">
-						<tr id="row_template">
-							<td class="center"></td>
-							<td></td>
-							<td></td>
-							<td></td>
-						<tr>
-					</tfoot>
-				</table>
+				<form id="data_form" method="get" action="#" accept-charset="utf-8">
+					<div id="options">
+						<div class="fleft container">
+							<label for="die_size">Die Size</label>
+							<br>
+							<input id="die_size" type="number" name="die_size" value="10000" min="4" max="10000" />
+						</div>
+						<div class="fleft container">
+							<label for="num_entries">Number of Entries</label>
+							<br>
+							<input id="num_entries" type="number" name="num_entries" value="20" min="1" max="1000" />
+						</div>
+						<div class="fleft container">
+							<label for="allow_duplicates">Allow Duplicates</label>
+							<br>
+							<input id="allow_duplicates" type="checkbox" name="allow_duplicates" title="Allow entries to be selected multiple times" />
+						</div>
+						<div class="fleft container">
+							<label for="include_ungrouped">Include Ungrouped</label>
+							<br>
+							<input id="include_ungrouped" type="checkbox" name="include_ungrouped" title="Include entries not assigned to a Category in a Default group" />
+						</div>
+					</div>
+					<div class="clear"></div>
+					<h4>SELECT FILTERS</h4>
+					<hr>
+					<div id="filters">
+					</div>
+					<div class="clear"></div>
+				</form>
 			</div>
+			<div class="fleft gen_pane-right">
+				<hr class="small-only">
+				<label id="copy_data_box" for="export_data_box"><span class="icon">&nbsp;</span> Click to Copy</label> the text below to the clipboard.
+				<br>
+				<textarea id="export_data_box" class="data_box"></textarea>
+				<br>
+				<button id="generate_table">Generate</button>
+				<button id="export_data">Export</button>
+				&nbsp;
+				<label for="export_format">Format</label>
+				<select id="export_format" name="export_format">
+					<option value="csv">CSV</option>
+					<option value="txt">Plain Text</option>
+				</select>
+				<label for="include_meta"><input id="include_meta" type="checkbox" name="include_meta" title="Include metadata such as the applied filters when exporting" />Include Table Metadata</label>
+				<hr>
+				<div id="enc_tbl_container" class="container hide">
+					<h4>RANDOM ENCOUNTER TABLE</h4>
+					<p><strong>Applied filters:</strong></p>
+					<div id="enc_opt_container" class="container">
+					</div>
+					<br>
+					<table>
+						<thead>
+							<tr>
+								<th class="center" id="tbl_die_size"></th>
+								<th>Encounter</th>
+								<th>Source</th>
+								<th>Page</th>
+							</tr>
+						<thead><tbody id="enc_tbl_entries">
+						</tbody><tfoot class="hide">
+							<tr id="row_template">
+								<td class="center"></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							<tr>
+						</tfoot>
+					</table>
+				</div>
+			</div>
+			<div class="clear"></div>
 		</div>
 	</body><footer>
 	</footer>

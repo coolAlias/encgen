@@ -91,3 +91,27 @@ table td {
 .tab_selected > a {
 	color: black;
 }
+.gen_pane-left {
+	margin-right: 20px;
+	width: 50%;
+}
+.gen_pane-right {
+	width: 35%;
+}
+.small-only {
+	display: none;
+	visibility: hidden;
+}
+@media only screen and (max-width: 900px) {
+	.gen_pane-left {
+		margin-right: 0px;
+		width: 100%;
+	}
+	.gen_pane-right {
+		width: 100%;
+	}
+	.small-only {
+		display: revert;
+		visibility: visible;
+	}
+}
