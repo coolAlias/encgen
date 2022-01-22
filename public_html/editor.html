@@ -21,8 +21,8 @@
 		<textarea id="data_box" class="data_box"></textarea>
 		<br>
 		<button id="btn_validate" title="Checks inputs for errors">Validate Form</button>
-		<button id="export_data" onclick="exportData()" title="Exports inputs into textbox above; copy and paste in a text editor to save">Export Data</button>
-		<button id="import_data" onclick="importData()" title="Imports data from the textbox above into the form inputs below">Import Data</button>
+		<button id="export_data" title="Exports inputs into textbox above; copy and paste in a text editor to save">Export Data</button>
+		<button id="import_data" title="Imports data from the textbox above into the form inputs below">Import Data</button>
 		<hr>
 		<div class="tab_group">
 			<div id="tab-help_tab" class="tab tab_selected">
@@ -145,7 +145,7 @@
 					</tfoot>
 				</table>
 				<hr>
-				<button id="btn_refresh_data" onclick="refreshDataElements()" title="Builds or rebuilds the Category and Filter elements">Refresh Data</button><span>&nbsp;Use after populating Categories/Filters and <strong>before</strong> creating encounter entries.</span>
+				<button id="btn_refresh_data" title="Builds or rebuilds the Category and Filter elements">Refresh Data</button><span>&nbsp;Use after populating Categories/Filters and <strong>before</strong> creating encounter entries.</span>
 				<ul>
 					<li><strong>Encounter Name</strong>: Unique name identifying this encounter entry</li>
 					<li><strong>Encounter Weight</strong>: Individual encounter weight; generally recommended to leave as 1 for an even distribution if using Weight Categories</li>

@@ -359,7 +359,10 @@ function importData() {
 	}
 }
 
-window.addEventListener("load", function(event) {
+window.addEventListener('load', function(event) {
+	document.getElementById('export_data').addEventListener('click', exportData);
+	document.getElementById('import_data').addEventListener('click', importData);
+	document.getElementById('btn_refresh_data').addEventListener('click', refreshDataElements);
 	document.getElementById('btn_validate').addEventListener('click', function(e) {
 		let f = document.getElementById('data_form');
 		if (validateForm(f)) {
