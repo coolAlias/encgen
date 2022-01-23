@@ -465,11 +465,30 @@ function generateEncounterTable() {
 		}
 		// Determine number of encounter entries expected from each group based on the their weight
 		let total_n = 0;
+		let unused = 0;
 		groups.forEach((group, key) => {
-			group.n = Math.ceil(num_entries * group.weight / total_weight);
-			log('Set n to ' + group.n + ' for group ' + group.name + ' (n=ceil(' + num_entries + ' * ' + group.weight + ' / ' + total_weight + '))');
+			let n = Math.ceil(num_entries * group.weight / total_weight);
+			group.n = Math.min(group.n, group.entries.length);
 			total_n += group.n;
+			unused += group.entries.length - group.n;
+			log('Set n to ' + group.n + ' for group ' + group.name + ' [n = ceil(' + num_entries + ' * ' + group.weight + ' / ' + total_weight + '), maximum = ' + group.entries.length + ']');
 		});
+		// Pad encounter groups if possible until requested number of entries if filled
+		if (total_n < num_entries && unused > 0) {
+			let remainder = num_entries - total_n;
+			log('Attempting to fill ' + remainder + ' entries; unused = ' + unused);
+			for (const group of groups.values()) {
+				let r = num_entries - total_n;
+				let diff = group.entries.length - group.n;
+				if (r > 0 && diff > 0) {
+					let n = Math.ceil(remainder * diff / unused);
+					n = Math.min(r, n, diff);
+					group.n = group.n + n;
+					total_n += n;
+					log('Added ' + n + ' entries to group ' + group.name + ' [group.n = ' + group.n + '; group.entries.length = ' + group.entries.length + ']');
+				}
+			}
+		}
 		// Remove excess encounter numbers, if any
 		while (total_n > num_entries) {
 			let group = getRandomGroup(groups, total_weight);
@@ -488,6 +507,7 @@ function generateEncounterTable() {
 				break;
 			}
 		}
+		log('Final number of entries to be selected: ' + total_n);
 	} else if (entries.length > 0) {
 		total_weight = entries.reduce((sum, obj) => { return sum + obj.weight; }, 0);
 		let cat = new Category("Default", total_weight);
