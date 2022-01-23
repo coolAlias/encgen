@@ -383,6 +383,10 @@ function importData() {
 		let filter_range_cols = document.getElementById('filter_range_cols');
 		filter_range_cols.value = data.range_filters.join("\n");
 		buildRangeFilterCols();
+	} else {
+		// Ensure any already-imported range filters are processed
+		let filter_range_cols = document.getElementById('filter_range_cols');
+		data.range_filters = (filter_range_cols ? filter_range_cols.value.split("\n").filter(s => s.length > 0) : []);
 	}
 	// Import encounter entries
 	if (data.entries) {
