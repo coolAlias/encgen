@@ -236,7 +236,7 @@ class FilterRange {
 		if (this.not) {
 			in_range = !in_range;
 		}
-		log(entry.name + (in_range ? ' passed' : ' failed') + ' range filter(' + this.name + (this.not ? 'NOT ' : '') + ' between ' + this.min + ' and ' + this.max);
+		log(entry.name + (in_range ? ' passed' : ' failed') + ' range filter(' + this.name + (this.not ? 'NOT ' : '') + ') between ' + this.min + ' and ' + this.max);
 		return in_range;
 	}
 	toText() {
