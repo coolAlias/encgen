@@ -171,12 +171,30 @@ class EncTblEntry {
  * @property include_meta Boolean, true to include metadata such as the die size, filter options, etc. when exported to JSON or other format
  */
 class EncTblContainer {
+	#last_roll;
 	constructor(die_size, filters = [], range_filters = []) {
 		this.die_size = die_size;
 		this.entries = [];
 		this.filters = filters;
 		this.range_filters = range_filters;
 		this.include_meta = true;
+		this.#last_roll = 0;
+	}
+	getLastRoll() {
+		return this.#last_roll;
+	}
+	/**
+	 * Rolls on the table and returns an entry; use getLastRoll() for the last die result.
+	 */
+	getRandomEntry() {
+		this.#last_roll = getRandomIntInclusive(1, this.die_size);
+		let roll = this.#last_roll - 1;
+		for (let i = 0; i < this.entries.length; ++i) {
+			if (roll < this.entries[i].max) {
+				return this.entries[i];
+			}
+		}
+		return null;
 	}
 	/**
 	 * @param entries Array<EncTblEntry> of entries in this table
@@ -614,7 +632,29 @@ function exportData() {
 	}
 }
 
+function rollRandomEncounter() {
+	if (!glob_enc_tbl || glob_enc_tbl.entries.length < 1) {
+		return;
+	}
+	let container = document.getElementById('rolled_encounter');
+	let entry = glob_enc_tbl.getRandomEntry();
+	if (entry) {
+		let txt = glob_enc_tbl.getLastRoll() + ' - ' + entry.name;
+		let src = entry.ref_src;
+		if (entry.ref_page) {
+			src = (src.length > 0 ? src + ', ' + entry.ref_page : entry.ref_page);
+		}
+		if (src.length > 0) {
+			txt = txt + ' (' + src + ')';
+		}
+		container.innerHTML = txt;
+	} else {
+		container.innerHTML = glob_enc_tbl.getLastRoll() + ' - No entry';
+	}
+}
+
 window.addEventListener('load', function(event) {
+	document.getElementById('btn_roll_enc').addEventListener('click', rollRandomEncounter);
 	document.getElementById('generate_table').addEventListener('click', generateEncounterTable);
 	document.getElementById('export_data').addEventListener('click', exportData);
 	document.getElementById('import_data').addEventListener('click', importData);
