@@ -632,6 +632,24 @@ function exportData() {
 	}
 }
 
+function testRandomEncounters() {
+	if (!glob_enc_tbl || glob_enc_tbl.entries.length < 1) {
+		return;
+	}
+	let results = new Map();
+	let n = (glob_enc_tbl.die_size * 10);
+	for (let i = 0; i < n; ++i) {
+		let entry = glob_enc_tbl.getRandomEntry();
+		let count = (results.has(entry.name) ? results.get(entry.name) + 1 : 1);
+		results.set(entry.name, count);
+	}
+	const unsorted = [...results];
+	const sorted = unsorted.sort(([k1, v1], [k2, v2]) => v2 - v1);
+	results = new Map(sorted);
+	log('Rolled ' + n + ' times; results:');
+	results.forEach((name, count) => log(count + ' - ' + name));
+}
+
 function rollRandomEncounter() {
 	if (!glob_enc_tbl || glob_enc_tbl.entries.length < 1) {
 		return;
@@ -655,6 +673,7 @@ function rollRandomEncounter() {
 
 window.addEventListener('load', function(event) {
 	document.getElementById('btn_roll_enc').addEventListener('click', rollRandomEncounter);
+	document.getElementById('btn_test_rolls').addEventListener('click', testRandomEncounters);
 	document.getElementById('generate_table').addEventListener('click', generateEncounterTable);
 	document.getElementById('export_data').addEventListener('click', exportData);
 	document.getElementById('import_data').addEventListener('click', importData);
