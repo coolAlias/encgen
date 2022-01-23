@@ -209,6 +209,7 @@ class EncTblContainer {
 		let lines = [];
 		if (this.include_meta) {
 			lines.push(this.#escTxt("RANDOM ENCOUNTER TABLE"));
+			lines.push(this.#escTxt("Generated " + this.entries.length + " Encounters"));
 			if (this.filters.length > 0) {
 				lines.push(this.#escTxt("Filters:"));
 				this.filters.forEach(obj => lines.push(this.#escTxt(obj.toText())));
@@ -527,6 +528,7 @@ function generateEncounterTable() {
 	// Display results
 	if (tbl_entries.length > 0) {
 		glob_enc_tbl.setEntries(tbl_entries);
+		document.getElementById('tbl_n').innerHTML = tbl_entries.length;
 		document.getElementById('tbl_die_size').innerHTML = 'd' + die_size;
 		displayEncounterTable(tbl_entries);
 	} else {
