@@ -11,6 +11,7 @@ $delimiter = ',';
 // 0-indexed column-to-variable mappings
 $csv_map = array(
 	'name' => 2,
+	'epv' => 3,
 	'weight' => null,
 	'weight_id' => 9,
 	'ref_src' => 0,
@@ -94,7 +95,6 @@ foreach ($header as $i => $key) {
 
 // Process rows
 $data = array();
-$auto = array('name', 'ref_src', 'ref_page');
 while (($row = fgetcsv($fp, $length, $delimiter)) !== false) {
 	$entry = array();
 	$entry['name'] = $row[$csv_map['name']];
@@ -112,6 +112,12 @@ while (($row = fgetcsv($fp, $length, $delimiter)) !== false) {
 	}
 	if (isset($csv_map['ref_page']) && $row[$csv_map['ref_page']] !== '') {
 		$entry['ref_page'] = $row[$csv_map['ref_page']];
+	}
+	if (isset($csv_map['epv'])) {
+		$epv = filter_var($row[$csv_map['epv']], FILTER_VALIDATE_INT);
+		if ($epv > -1) {
+			$entry['EPV'] = $epv;
+		}
 	}
 	$entry_filters = array();
 	foreach ($csv_map['filters'] as $filter_key => $values) {
