@@ -27,7 +27,10 @@
 	"entries":[
 		{
 			"name":"Goblin",
+			"weight":1,
 			"weight_id":2,
+			"ref_src":"Book 1",
+			"ref_page":"140",
 			"filters":{
 				"dataType":"Map",
 				"value":[
