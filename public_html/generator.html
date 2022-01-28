@@ -96,15 +96,23 @@
 				<br>
 				<textarea id="export_data_box" class="data_box"></textarea>
 				<br>
-				<button type="button" id="generate_table">Generate</button>
-				<button type="button" id="export_data">Export</button>
-				&nbsp;
-				<label for="export_format">Format</label>
-				<select id="export_format" name="export_format">
-					<option value="csv">CSV</option>
-					<option value="txt">Plain Text</option>
-				</select>
-				<label for="include_meta"><input id="include_meta" type="checkbox" name="include_meta" title="Include metadata such as the applied filters when exporting" />Include Table Metadata</label>
+				<div class="fleft">
+					<button type="button" id="generate_table">Generate</button>
+					<br>
+					<button type="button" id="display_filtered_entries" title="Display all entries that match the current filter(s)">Filter Only</button>
+				</div>
+				<div class="fright">
+					<label for="export_format">Format</label>
+					<select id="export_format" name="export_format">
+						<option value="csv">CSV</option>
+						<option value="txt">Plain Text</option>
+					</select>
+					&nbsp;
+					<button type="button" id="export_data">Export</button>
+					<br>
+					<label for="include_meta"><input id="include_meta" type="checkbox" name="include_meta" title="Include metadata such as the applied filters when exporting" />Include Table Metadata</label>
+				</div>
+				<div class="clear"></div>
 				<hr>
 				<div id="enc_tbl_container" class="container hide">
 					<h4>RANDOM ENCOUNTER TABLE</h4>

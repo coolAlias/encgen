@@ -412,7 +412,7 @@ function createRangeFilterInput(container, col, suffix, add_label = false) {
 	container.appendChild(input);
 }
 
-function generateEncounterTable() {
+function generateEncounterTable(display_all = false) {
 	let die_size = parseInt(document.getElementById('die_size').value);
 	let num_entries = parseInt(document.getElementById('num_entries').value);
 	let allow_duplicates = document.getElementById('allow_duplicates').checked;
@@ -514,7 +514,7 @@ function generateEncounterTable() {
 				--total_n;
 				group.n = group.n - 1;
 				log('Subtracted 1 n from group ' + group.name + '; remaining n = ' + group.n);
-				if (group.n < 1) {
+				if (group.n < 1 && !display_all) {
 					log('n < 1, removing group ' + group.name);
 					groups.delete(group.name);
 					total_weight -= group.weight;
@@ -538,12 +538,24 @@ function generateEncounterTable() {
 	// Generate random entries for each group
 	let total_die_size = 0;
 	let tbl_entries = [];
-	groups.forEach((group, key) => {
-		let range = Math.ceil(die_size * (group.weight / total_weight));
-		let selected = group.getRandomEntries(range, allow_duplicates);
-		total_die_size += group.range;
-		tbl_entries.push(...selected);
-	});
+	if (display_all) {
+		groups.forEach((group, key) => {
+			group.entries.forEach(entry => {
+				let obj = new EncTblEntry(entry);
+				tbl_entries.push(obj);
+			});
+		});
+		die_size = tbl_entries.length;
+		glob_enc_tbl.die_size = die_size;
+		total_die_size = tbl_entries.length;
+	} else {
+		groups.forEach((group, key) => {
+			let range = Math.ceil(die_size * (group.weight / total_weight));
+			let selected = group.getRandomEntries(range, allow_duplicates);
+			total_die_size += group.range;
+			tbl_entries.push(...selected);
+		});
+	}
 	log("Expected die size: " + die_size + " vs Actual: " + total_die_size);
 	// Sort encounter entries by range (DESC) and alphabetically (ASC)
 	tbl_entries.sort((a, b) => {
@@ -674,7 +686,8 @@ function rollRandomEncounter() {
 window.addEventListener('load', function(event) {
 	document.getElementById('btn_roll_enc').addEventListener('click', rollRandomEncounter);
 	document.getElementById('btn_test_rolls').addEventListener('click', testRandomEncounters);
-	document.getElementById('generate_table').addEventListener('click', generateEncounterTable);
+	document.getElementById('generate_table').addEventListener('click', function() { generateEncounterTable(false); });
+	document.getElementById('display_filtered_entries').addEventListener('click', function() { generateEncounterTable(true); });
 	document.getElementById('export_data').addEventListener('click', exportData);
 	document.getElementById('import_data').addEventListener('click', importData);
 });
