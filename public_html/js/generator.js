@@ -149,6 +149,11 @@ class EncTblEntry {
 		this.range = range;
 		this.min = 1;
 		this.max = this.min + this.range - 1;
+		glob_range_filters.forEach(col => {
+			if (entry.hasOwnProperty(col)) {
+				this[col] = entry[col];
+			}
+		});
 	}
 	/**
 	 * @param lastEntry EncTblEntry, optional last entry that was processed
@@ -237,9 +242,19 @@ class EncTblContainer {
 				this.range_filters.forEach(obj => lines.push(this.#escTxt(obj.toText())));
 			}
 		}
-		lines.push(this.#escTxt("d" + this.die_size) + separator + this.#escTxt("Encounter") + separator + this.#escTxt("Source") + separator + this.#escTxt("Page"));
+		let header = this.#escTxt("d" + this.die_size) + separator + this.#escTxt("Encounter") + separator + this.#escTxt("Source") + separator + this.#escTxt("Page");
+		glob_range_filters.forEach(col => {
+			header = header + separator + this.#escTxt(col.charAt(0).toLocaleUpperCase() + col.slice(1));
+		});
+		lines.push(header);
 		this.entries.forEach(obj => {
-			lines.push(this.#escTxt(obj.getRangeText(null)) + separator + this.#escTxt(obj.name) + separator + this.#escTxt(obj.ref_src) + separator + this.#escTxt(obj.ref_page));
+			let txt = this.#escTxt(obj.getRangeText(null)) + separator + this.#escTxt(obj.name) + separator + this.#escTxt(obj.ref_src) + separator + this.#escTxt(obj.ref_page);
+			glob_range_filters.forEach(col => {
+				if (obj.hasOwnProperty(col)) {
+					txt = txt + separator + this.#escTxt(obj[col])
+				}
+			});
+			lines.push(txt);
 		});
 		return lines;
 	}
@@ -297,6 +312,8 @@ function importData() {
 		});
 	}
 	// Import range filters
+	let enc_tbl_header = document.getElementById('enc_tbl_header');
+	let enc_tbl_template = document.getElementById('enc_tbl_template');
 	let range_filters_container = document.getElementById('range_filters_container');
 	let range_filters = document.getElementById('range_filters');
 	if (data.range_filters) {
@@ -307,6 +324,10 @@ function importData() {
 			let el = getRangeFilterTableRow(col);
 			if (el) {
 				glob_range_filters.push(col);
+				let th = document.createElement('TH');
+				th.innerHTML = col.charAt(0).toLocaleUpperCase() + col.slice(1);
+				enc_tbl_header.appendChild(th);
+				enc_tbl_template.appendChild(document.createElement('TD'));
 				range_filters.appendChild(el);
 			}
 		});
@@ -607,12 +628,18 @@ function displayEncounterTable(entries) {
 	let template = document.getElementById('enc_tbl_template');
 	let lastEntry = null;
 	entries.forEach(entry => {
+		let j = 0;
 		let row = template.cloneNode(true);
 		row.removeAttribute('id');
-		row.children[0].innerHTML = entry.getRangeText(lastEntry);
-		row.children[1].innerHTML = entry.name;
-		row.children[2].innerHTML = entry.ref_src;
-		row.children[3].innerHTML = entry.ref_page;
+		row.children[j++].innerHTML = entry.getRangeText(lastEntry);
+		row.children[j++].innerHTML = entry.name;
+		row.children[j++].innerHTML = entry.ref_src;
+		row.children[j++].innerHTML = entry.ref_page;
+		glob_range_filters.forEach(col => {
+			if (entry.hasOwnProperty(col)) {
+				row.children[j++].innerHTML = entry[col];
+			}
+		});
 		body.appendChild(row);
 		lastEntry = entry;
 	});
