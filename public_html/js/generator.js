@@ -604,7 +604,7 @@ function displayEncounterTable(entries) {
 	document.getElementById('enc_tbl_container').classList.remove('hide');
 	let body = document.getElementById('enc_tbl_entries');
 	body.replaceChildren();
-	let template = document.getElementById('row_template');
+	let template = document.getElementById('enc_tbl_template');
 	let lastEntry = null;
 	entries.forEach(entry => {
 		let row = template.cloneNode(true);
